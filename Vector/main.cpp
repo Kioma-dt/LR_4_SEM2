@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "vector.h"
 #include "vector.cpp"
 
@@ -42,5 +43,12 @@ int main(){
     for (int i = 0; i < b.size(); i++)
     {
         std::cout << b[i] << std::endl;
+    }
+
+    std::cout << std::endl;
+    std::vector<int> shit({1, 3, 2, 10, 24});
+    Vector<int> cool(shit.begin(), shit.end());
+    for (auto i = cool.rbegin(); i != cool.rend(); i++){
+        std::cout << *i << std::endl;
     }
 }

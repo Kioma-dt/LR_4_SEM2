@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <stdexcept>
+#include "iterator.h"
 
 template <typename T>
 class Vector{
@@ -13,9 +14,24 @@ class Vector{
         void reallocate(size_t new_capacity);
 
     public:
+        using value_type = T;
+        using allocator_type = std::allocator<T>;
+        using size_type = size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = T &;
+        using const_reference = const T &;
+        using pointer = T *;
+        using const_pointer = const T *;
+        using iterator = Iterator<T>;
+        using const_iterator = ConstIterator<T>;
+        using reverse_iterator = ReverseIterator<T>;
+        using const_reverse_iterator = ConstReverseIterator<T>;
+
         Vector() : data(nullptr), size_(0), capacity_(0) {};
         explicit Vector(size_t size);
         explicit Vector(size_t size, const T &value);
+        template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt> > >
+        Vector(InputIt first, InputIt last);
         Vector(const Vector &other);
         Vector(Vector &&other) noexcept;
         ~Vector();
@@ -33,8 +49,17 @@ class Vector{
         const T &front() const;
         T &back();
         const T &back() const;
-        T *getData();
+        T *data_ptr();
         const T *data_ptr() const;
+
+        Vector<T>::iterator begin();
+        Vector<T>::iterator end();
+        Vector<T>::const_iterator cbegin() const;
+        Vector<T>::const_iterator cend() const;
+        Vector<T>::reverse_iterator rbegin();
+        Vector<T>::reverse_iterator rend();
+        Vector<T>::const_reverse_iterator rcbegin() const;
+        Vector<T>::const_reverse_iterator rcend() const;
 
         bool empty() const;
         size_t size() const;

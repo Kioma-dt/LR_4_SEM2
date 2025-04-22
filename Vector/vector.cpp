@@ -1,4 +1,5 @@
 #include "vector.h"
+#include "iterator.cpp"
 
 template <typename T>
 void Vector<T>::reallocate(size_t new_capacity)
@@ -37,6 +38,32 @@ Vector<T>::Vector(size_t size, const T &value)
     for (int i = 0; i < size; i++)
     {
         allocator.construct(data + i, value);
+    }
+}
+
+template <typename T>
+template <typename InputIt, typename>
+Vector<T>::Vector(InputIt first, InputIt last){
+    capacity_ = (first - last) > 0 ? (first - last) : (last - first);
+    size_ = capacity_;
+    data = allocator.allocate(capacity_);
+
+    size_t i = 0;
+    try
+    {
+        for (; first != last; first++, i++){
+            allocator.construct(data + i, *first);
+        }
+    }
+    catch(...){
+        for (size_t j = 0; j < i; j++){
+            allocator.destroy(data + j);
+        }
+        allocator.deallocate(data, capacity_);
+        data = nullptr;
+        size_ = 0;
+        capacity_ = 0;
+        throw;
     }
 }
 
@@ -164,7 +191,7 @@ const T &Vector<T>::back() const{
 }
 
 template <typename T>
-T *Vector<T>::getData(){
+T *Vector<T>::data_ptr(){
     return data;
 }
 
@@ -172,6 +199,47 @@ template <typename T>
 const T *Vector<T>::data_ptr() const{
     return data;
 }
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::begin(){
+    return iterator(data);
+}
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::end(){
+    return iterator(data + size_);
+}
+
+template <typename T>
+typename Vector<T>::const_iterator Vector<T>::cbegin() const{
+    return const_iterator(data);
+}
+
+template <typename T>
+typename Vector<T>::const_iterator Vector<T>::cend() const{
+    return const_iterator(data + size_);
+}
+
+template <typename T>
+typename Vector<T>::reverse_iterator Vector<T>::rbegin(){
+    return reverse_iterator(data + size_);
+}
+
+template <typename T>
+typename Vector<T>::reverse_iterator Vector<T>::rend(){
+    return reverse_iterator(data);
+}
+
+template <typename T>
+typename Vector<T>::const_reverse_iterator Vector<T>::rcbegin() const{
+    return const_reverse_iterator(data + size_);
+}
+
+template <typename T>
+typename Vector<T>::const_reverse_iterator Vector<T>::rcend() const{
+    return const_reverse_iterator(data);
+}
+
 
 template <typename T>
 bool Vector<T>::empty() const
