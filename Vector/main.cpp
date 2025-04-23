@@ -2,6 +2,8 @@
 #include <vector>
 #include "vector.h"
 #include "vector.cpp"
+#include "pair.h"
+#include "pair.cpp"
 
 int main(){
     Vector<int> a(3, 4);
@@ -61,4 +63,29 @@ int main(){
     {
         std::cout << i << std::endl;
     }
+
+    std::cout << std::endl;
+    Pair<Pair<int, double>, Pair<double, Vector<int>>> x;
+    Pair<int, double> fir = make_pair(10, 21.10);
+    Vector<int> vec(3, 4);
+    Pair<double, Vector<int>> sec = make_pair(6.66, vec);
+    x = make_pair(fir, sec);
+    std::cout << x.first.first << '\t' << x.first.second << '\t' << x.second.first << std::endl;
+    for (auto i : x.second.second){
+        std::cout << i << std::endl;
+    }
+
+    std::cout << std::endl;
+    Vector<Pair<double, int>> par;
+    par.push_back(make_pair(10.4, 3l));
+    par.push_back(make_pair(4, 5.5));
+    par.push_back(make_pair(5.1, 61));
+
+    for(auto i: par){
+        std::cout << i.first << '\t' << i.second << std::endl;
+    }
+
+    Vector<Pair<Vector<int>, Vector<Pair<int, double>>>> vector_(1);
+    vector_.front().first.push_back(5);
+    std::cout << vector_.front().first.front() << std::endl;
 }
