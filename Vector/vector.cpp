@@ -313,7 +313,13 @@ typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, const T 
 template <typename T>
 typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, T &&value){
     std::ptrdiff_t index = pos - begin();
-    this->reserve(size_ + 1);
+
+    if (size_ == capacity_)
+    {
+        size_t new_capacity = capacity_ == 0 ? 1 : 2 * capacity_;
+        this->reallocate(new_capacity);
+    }
+
     pos = begin() + index;
 
     for (size_t i = size_ - 1; i >= index; i--){
@@ -325,7 +331,7 @@ typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, T &&valu
     }
 
     allocator.construct(data + index, std::move(value));
-    size ++;
+    size_++;
 
     return pos;
 }
@@ -337,7 +343,10 @@ typename Vector<T>::iterator Vector<T>::insert(typename Vector<T>::iterator pos,
     }
 
     std::ptrdiff_t index = pos - begin();
-    this->reserve(size_ + count);
+    if (size_ + count > capacity_){
+        size_t new_capacity = std::max(2 * capacity_, size_ + count);
+        this->reallocate(new_capacity);
+    }
     pos = begin() + index;
 
     for (size_t i = size_ - 1; i >= index; i--){
@@ -367,7 +376,10 @@ typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, InputIt 
     }
 
     std::ptrdiff_t index = pos - begin();
-    this->reserve(size_ + count);
+    if (size_ + count > capacity_){
+        size_t new_capacity = std::max(2 * capacity_, size_ + count);
+        this->reallocate(new_capacity);
+    }
     pos = begin() + index;
 
     for (size_t i = size_ - 1; i >= index; i--){
@@ -391,7 +403,11 @@ template <typename T>
 template <typename... Args>
 typename Vector<T>::iterator Vector<T>::emplace(Vector<T>::iterator pos, Args &&...args){
     std::ptrdiff_t index = pos - begin();
-    this->reserve(size_ + 1);
+    if (size_ == capacity_)
+    {
+        size_t new_capacity = capacity_ == 0 ? 1 : 2 * capacity_;
+        this->reallocate(new_capacity);
+    }
     pos = begin() + index;
 
     for (size_t i = size_ - 1; i >= index; i--){

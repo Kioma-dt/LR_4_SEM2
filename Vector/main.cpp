@@ -48,6 +48,7 @@ int main(){
     std::cout << std::endl;
     std::vector<int> shit({10, 24, 32, 10, 28, 76, 64});
     Vector<int> cool(shit.begin(), shit.end());
+    cool.insert(cool.begin() + 3, 16, 2);
     for (auto i : cool)
     {
         std::cout << i << std::endl;
