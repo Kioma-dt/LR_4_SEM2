@@ -40,6 +40,8 @@ class Vector{
         Vector& operator=(Vector &&other) noexcept;
 
         void assign(size_t count, const T &value);
+        template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
+        void assign(InputIt first, InputIt last);
 
         T& at(size_t pos);
         const T& at(size_t pos) const;
@@ -71,6 +73,21 @@ class Vector{
         void pop_back();
 
         void clear();
+
+        Vector<T>::iterator insert(Vector<T>::iterator pos, const T &value);
+        Vector<T>::iterator insert(Vector<T>::iterator pos, T &&value);
+        Vector<T>::iterator insert(Vector<T>::iterator pos, size_t count, const T &value);
+        template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
+        Vector<T>::iterator insert(Vector<T>::iterator pos, InputIt first, InputIt last);
+
+        template <typename... Args>
+        Vector<T>::iterator emplace(Vector<T>::iterator pos, Args &&...args);
+        template <typename... Args>
+        T& emplace_back(Args &&...args);
+
+        Vector<T>::iterator erase(Vector<T>::iterator pos);
+        Vector<T>::iterator erase(Vector<T>::iterator first, Vector<T>::iterator last);
+
         void resize(size_t count);
         void resize(size_t count, const T& value);
         void swap(Vector &other);

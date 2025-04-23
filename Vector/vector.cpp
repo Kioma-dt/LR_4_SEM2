@@ -44,26 +44,12 @@ Vector<T>::Vector(size_t size, const T &value)
 template <typename T>
 template <typename InputIt, typename>
 Vector<T>::Vector(InputIt first, InputIt last){
-    capacity_ = (first - last) > 0 ? (first - last) : (last - first);
+    capacity_ = last - first;
     size_ = capacity_;
     data = allocator.allocate(capacity_);
 
-    size_t i = 0;
-    try
-    {
-        for (; first != last; first++, i++){
-            allocator.construct(data + i, *first);
-        }
-    }
-    catch(...){
-        for (size_t j = 0; j < i; j++){
-            allocator.destroy(data + j);
-        }
-        allocator.deallocate(data, capacity_);
-        data = nullptr;
-        size_ = 0;
-        capacity_ = 0;
-        throw;
+    for (size_t i = 0; first != last; first++, i++){
+        allocator.construct(data + i, *first);
     }
 }
 
@@ -135,6 +121,20 @@ void Vector<T>::assign(size_t count, const T &value){
         allocator.construct(data + i, value);
     }
 
+    size_ = count;
+}
+
+template <typename T>
+template <typename InputIt, typename>
+void Vector<T>::assign(InputIt first, InputIt last){
+    this->clear();
+
+    size_t count = last - first;
+    this->reserve(count);
+
+    for (size_t i = 0; first != last; first++, i++){
+        allocator.construct(data + i, *first);
+    }
     size_ = count;
 }
 
@@ -303,6 +303,157 @@ void Vector<T>::clear()
         allocator.destroy(data + i);
     }
     size_ = 0;
+}
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, const T &value){
+    return insert(pos, 1, value);
+}
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, T &&value){
+    std::ptrdiff_t index = pos - begin();
+    this->reserve(size_ + 1);
+    pos = begin() + index;
+
+    for (size_t i = size_ - 1; i >= index; i--){
+        allocator.construct(data + i + 1, std::move(data[i]));
+        allocator.destroy(data + i);
+        if(i == 0){
+            break;
+        }
+    }
+
+    allocator.construct(data + index, std::move(value));
+    size ++;
+
+    return pos;
+}
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::insert(typename Vector<T>::iterator pos, size_t count, const T &value){
+    if (count == 0){
+        return pos;
+    }
+
+    std::ptrdiff_t index = pos - begin();
+    this->reserve(size_ + count);
+    pos = begin() + index;
+
+    for (size_t i = size_ - 1; i >= index; i--){
+        allocator.construct(data + i + count, std::move(data[i]));
+        allocator.destroy(data + i);
+        if(i == 0){
+            break;
+        }
+    }
+
+    for (size_t i = 0; i < count; i++)
+    {
+        allocator.construct(data + index + i, value);
+    }
+
+    size_ += count;
+    return pos;
+}
+
+template <typename T>
+template <typename InputIt, typename>
+typename Vector<T>::iterator Vector<T>::insert(Vector<T>::iterator pos, InputIt first, InputIt last){
+    size_t count = last - first;
+
+    if (count == 0){
+        return pos;
+    }
+
+    std::ptrdiff_t index = pos - begin();
+    this->reserve(size_ + count);
+    pos = begin() + index;
+
+    for (size_t i = size_ - 1; i >= index; i--){
+        allocator.construct(data + i + count, std::move(data[i]));
+        allocator.destroy(data + i);
+        if(i == 0){
+            break;
+        }
+    }
+
+    for (size_t i = 0; first != last; first++, i++)
+    {
+        allocator.construct(data + index + i, *first);
+    }
+
+    size_ += count;
+    return pos;
+}
+
+template <typename T>
+template <typename... Args>
+typename Vector<T>::iterator Vector<T>::emplace(Vector<T>::iterator pos, Args &&...args){
+    std::ptrdiff_t index = pos - begin();
+    this->reserve(size_ + 1);
+    pos = begin() + index;
+
+    for (size_t i = size_ - 1; i >= index; i--){
+        allocator.construct(data + i + 1, std::move(data[i]));
+        allocator.destroy(data + i);
+        if(i == 0){
+            break;
+        }
+    }
+
+    allocator.construct(data + index, std::forward<Args>(args)...);
+    size_++;
+
+    return pos;
+}
+
+template <typename T>
+template <typename... Args>
+T& Vector<T>::emplace_back(Args &&...args){
+    if (size_ == capacity_){
+        this->reallocate(2 * capacity_);
+    }
+
+    allocator.construct(data + size_, std::forward<Args>(args)...);
+    size_++;
+
+    return data[size_ - 1];
+}
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::erase(Vector<T>::iterator pos){
+    std::ptrdiff_t index = pos - begin();
+
+    allocator.destroy(data + index);
+
+    for (size_t i = index + 1; i < size_; i++){
+        allocator.construct(data + i - 1, std::move(data[i]));
+        allocator.destroy(data + i);
+    }
+
+    size_--;
+    return pos;
+}
+
+template <typename T>
+typename Vector<T>::iterator Vector<T>::erase(Vector<T>::iterator first, Vector<T>::iterator last){
+    std::ptrdiff_t index_first = first - begin();
+    std::ptrdiff_t index_last = last - begin();
+
+    for (size_t i = index_first; i < index_last; i++){
+        allocator.destroy(data + i);
+    }
+
+    std::ptrdiff_t count = index_last - index_first;
+
+    for (size_t i = index_last; i < size_; i++){
+        allocator.construct(data - count + i, std::move(data[i]));
+        allocator.destroy(data + i);
+    }
+
+    size_ -= count;
+    return first;
 }
 
 template <typename T>

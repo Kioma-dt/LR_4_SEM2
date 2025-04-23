@@ -46,9 +46,18 @@ int main(){
     }
 
     std::cout << std::endl;
-    std::vector<int> shit({1, 3, 2, 10, 24});
+    std::vector<int> shit({10, 24, 32, 10, 28, 76, 64});
     Vector<int> cool(shit.begin(), shit.end());
-    for (auto i = cool.rbegin(); i != cool.rend(); i++){
-        std::cout << *i << std::endl;
+    for (auto i : cool)
+    {
+        std::cout << i << std::endl;
+    }
+    std::cout << cool.capacity() << std::endl;
+
+    std::cout << std::endl;
+    cool.erase(cool.begin(), cool.end() - 1);
+    for (auto i : cool)
+    {
+        std::cout << i << std::endl;
     }
 }

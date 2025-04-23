@@ -15,6 +15,7 @@ class Iterator{
 
         Iterator() : ptr(nullptr) {};
         explicit Iterator(T *pointer) : ptr(pointer) {};
+        Iterator(const Iterator &other) : ptr(other.ptr) {};
 
         Iterator<T>::reference operator*() const;
         Iterator<T>::pointer operator->() const;
@@ -43,6 +44,7 @@ class ConstIterator : public Iterator<const T>{
     public:
         ConstIterator() : Iterator<const T>(){};
         ConstIterator(const T *pointer) : Iterator<const T>(pointer){};
+        ConstIterator(const ConstIterator &other) : Iterator<const T>(other){};
 };
 
 template <typename T>
@@ -59,6 +61,7 @@ class ReverseIterator{
 
         ReverseIterator() : ptr(nullptr) {};
         explicit ReverseIterator(T *pointer) : ptr(pointer) {};
+        ReverseIterator(const ReverseIterator &other) : ptr(other.ptr) {};
 
         ReverseIterator<T>::reference operator*() const;
         ReverseIterator<T>::pointer operator->() const;
